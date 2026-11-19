@@ -1,0 +1,45 @@
+diff -u -r pa/src/handlers/quickTools.js pb2/src/handlers/quickTools.js
+--- pa/src/handlers/quickTools.js	2026-11-19 06:43:24.728618714 +0000
++++ pb2/src/handlers/quickTools.js	2026-11-19 06:43:24.772073349 +0000
+@@ -382,6 +382,12 @@
+ export default function actions(action, value) {
+ 	setQuicktoolsUsed();
+ 
++	// The paste quick tool targets the code editor; in a terminal tab it has to
++	// go to the terminal instead (and must not take focus away from it).
++	if (action === "command" && value === "paste" && getActiveTerminalComponent()) {
++		return pasteIntoTerminal();
++	}
++
+ 	const { editor } = editorManager;
+ 	const { $input, $replaceInput } = quickTools;
+ 	const routed = quickToolsAdapters.has() && adapterAction(action, value);
+@@ -1145,6 +1151,16 @@
+ 	return getActiveTerminalComponent()?.terminal?.textarea || null;
+ }
+ 
++function pasteIntoTerminal() {
++	const clipboard = globalThis.cordova?.plugins?.clipboard;
++	if (!clipboard) return false;
++	clipboard.paste(
++		(text) => insertText(text),
++		(error) => console.error("Failed to read clipboard", error),
++	);
++	return true;
++}
++
+ function insertText(value) {
+ 	const text = String(value ?? "");
+ 	if (!text) return false;
+diff -u -r pa/src/lib/settings.js pb2/src/lib/settings.js
+--- pa/src/lib/settings.js	2026-11-19 06:43:24.729640238 +0000
++++ pb2/src/lib/settings.js	2026-11-19 06:43:24.772178119 +0000
+@@ -198,7 +198,7 @@
+ 			touchMoveThreshold: Math.round((1 / devicePixelRatio) * 10) / 20,
+ 			quicktoolsItems: [
+ 				2, 1, 5, 3, 4, 18, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 33, 21, 20,
+-				16, 19, 17, 23, 24, 25, 26, 27, 28, 29, 30, 31,
++				16, 19, 17, 23, 24, 25, 26, 27, 28, 29, 30, 47,
+ 			],
+ 			excludeFolders: this.#excludeFolders,
+ 			useFileOperationExclusions: true,

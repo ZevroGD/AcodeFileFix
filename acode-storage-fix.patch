@@ -1,0 +1,53 @@
+diff -u -r a/config.xml b/config.xml
+--- a/config.xml	2026-11-17 19:40:32.026226745 +0000
++++ b/config.xml	2026-11-17 19:40:32.029053033 +0000
+@@ -324,6 +324,7 @@
+             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+             <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
++            <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+             <uses-permission android:name="android.permission.VIBRATE" />
+         </config-file>
+ 
+diff -u -r a/src/plugins/terminal/src/android/AlpineDocumentProvider.java b/src/plugins/terminal/src/android/AlpineDocumentProvider.java
+--- a/src/plugins/terminal/src/android/AlpineDocumentProvider.java	2026-11-17 19:40:32.027661496 +0000
++++ b/src/plugins/terminal/src/android/AlpineDocumentProvider.java	2026-11-17 19:40:32.030465455 +0000
+@@ -16,6 +16,7 @@
+ import java.io.File;
+ import java.io.FileNotFoundException;
+ import java.io.IOException;
++import java.nio.file.Files;
+ import java.util.Collections;
+ import java.util.LinkedList;
+ import java.util.Locale;
+@@ -168,11 +169,29 @@
+     @Override
+     public void deleteDocument(String documentId) throws FileNotFoundException {
+         File file = getFileForDocId(documentId);
+-        if (!file.delete()) {
++        if (!deleteRecursive(file)) {
+             throw new FileNotFoundException("Failed to delete document with id " + documentId);
+         }
+     }
+ 
++    /**
++     * Deletes a file or a directory tree. File.delete() alone only removes
++     * empty directories, which made every non-empty folder undeletable from
++     * file managers. Symlinks are unlinked, never followed.
++     */
++    private static boolean deleteRecursive(File file) {
++        boolean isLink = Files.isSymbolicLink(file.toPath());
++        if (!isLink && file.isDirectory()) {
++            File[] children = file.listFiles();
++            if (children != null) {
++                for (File child : children) {
++                    deleteRecursive(child);
++                }
++            }
++        }
++        return file.delete();
++    }
++
+     @Override
+     public String renameDocument(String documentId, String displayName) throws FileNotFoundException {
+         File file = getFileForDocId(documentId);
