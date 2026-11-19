@@ -17,4 +17,4 @@ Got to the Actions tab and select the latest workflow under "Build Acode APK".
 
 
 **More coming soon**
-Report bugs or suggestions in the [Actions](github.com/ZevroGD/AcodeFileFix/Issues) menu. 
+Report bugs or suggestions in the [Actions](https://github.com/ZevroGD/AcodeFileFix/issues) menu. 
