@@ -1,0 +1,96 @@
+
+name: Build Acode APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acode-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Apply patches
+        run: |
+          git apply --check acode-storage-fix.patch acode-paste-quicktool.patch
+          git apply acode-storage-fix.patch acode-paste-quicktool.patch
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install -g cordova
+          npm run setup
+
+      - name: Prepare storage manager
+        run: node utils/storage_manager.mjs y
+
+      - name: Build APK
+        run: npm run build paid dev apk
+
+      - name: Inspect APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APK="platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -s "$APK" ]; then
+            echo "::error::APK missing or empty"
+            exit 1
+          fi
+
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" \
+            -mindepth 1 -maxdepth 1 -type d \
+            | sort -V | tail -n 1)
+
+          echo "=== APK INFO ==="
+          file "$APK"
+
+          echo "=== ZIP INTEGRITY ==="
+          unzip -t "$APK"
+
+          echo "=== APK SIGNATURE ==="
+          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+
+          echo "=== APK PACKAGE ==="
+          "$BUILD_TOOLS/aapt" dump badging "$APK"
+
+          echo "=== APK CONTENTS ==="
+          unzip -l "$APK" | head -60
+
+          echo "=== APK SHA256 ==="
+          sha256sum "$APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: acode-debug-apk
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
