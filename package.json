@@ -58,12 +58,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deadlyjack/acode.git"
+    "url": "git+https://github.com/ZevroGD/AcodeFileFix.git"
   },
   "bugs": {
-    "url": "https://github.com/deadlyjack/acode/issues"
+    "url": "https://github.com/ZevroGD/AcodeFileFix/issues"
   },
-  "homepage": "https://github.com/deadlyjack/acode#readme",
+  "homepage": "https://github.com/ZevroGD/AcodeFileFix#readme",
   "devDependencies": {
     "@babel/core": "^8.0.1",
     "@babel/generator": "^7.29.8",
