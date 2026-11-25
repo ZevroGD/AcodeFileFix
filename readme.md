@@ -4,7 +4,7 @@
 If you want to customize the patches	applied fork this fork, delete the patches you don't want and run "Build Acode APK" in the workflow menu under the Actions tab. 
 
 ## Installing
-Got to the Actions tab and select the latest workflow under "Build Acode APK". 
+Go to the Actions tab and select the latest workflow under "Build Acode APK". 
 
 # Current patches
 
@@ -17,4 +17,4 @@ Got to the Actions tab and select the latest workflow under "Build Acode APK".
 
 
 **More coming soon**
-Report bugs or suggestions in the [Actions](https://github.com/ZevroGD/AcodeFileFix/issues) menu. 
+Report bugs or suggestions in [GitHub Issues](https://github.com/ZevroGD/AcodeFileFix/issues). 
